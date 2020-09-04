@@ -690,7 +690,7 @@ class aceinna_test_case():
                 return False
         self.dev.set_to_default(pwr_rst = False)
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[target_data, measure_data]})        
-        self.function_measure_data[sys._getframe().f_code.co_name] = measure_data
+        self.function_measure_data[sys._getframe().f_code.co_name] = True
         if int(measure_data, 16) != int(target_data, 16):
             return False
         return True
@@ -955,8 +955,8 @@ class aceinna_test_case():
             try_idx = idx_list if tryidx == None else [tryidx]
             try:
                 for j in try_idx:
-                    # if False in list(results.values()):
-                    #     break
+                    if (False in list(results.values())) or self.debug:
+                        break
                     if self.debug: eval('print(k,i)', {'k':sys._getframe().f_code.co_name, 'i':[ps_type, i,j, idx_list, try_idx]})
                     cmd_name = cmdname[j] # list out of range
                     item_dict = self.dev.get_item_json(namestr = cmd_name)
