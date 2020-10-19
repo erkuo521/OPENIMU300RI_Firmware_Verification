@@ -15,10 +15,10 @@ from test_case import aceinna_test_case
 from gpio import aceinna_gpio
 
 # def main(debug_main = False, dev_type = 'MTLT305D'):
-def main(dev_type = 'MTLT305D', bcm_pin_list = []): 
+def main(dev_type = 'MTLT305D', app = 'IMU', bcm_pin_list = []): 
     start_time = time.time()   
     loc_time = '_'.join([str(x) for x in list(time.localtime())])
-    with open('can_attribute_' + dev_type + '.json') as json_data:
+    with open('can_attribute_' + dev_type + '_' + app + '.json') as json_data:
         can_attribute = json.load(json_data)
     debug_main = True if can_attribute['debug_mode'].upper() == 'TRUE' else False
     testitems = can_attribute['test_items'] # testitems = ['3.6']
@@ -34,7 +34,7 @@ def main(dev_type = 'MTLT305D', bcm_pin_list = []):
 
     device_list = []
     for idx,i in enumerate(dev_nodes):
-        ad = aceinna_device(i, attribute_json = can_attribute,debug_mode = debug_main, power_gpio=gpio_list[idx], devtype=dev_type)
+        ad = aceinna_device(i, attribute_json = can_attribute,debug_mode = debug_main, power_gpio=gpio_list[idx], devtype=dev_type, app_type=app)
         main_driver.register_dev(dev_src = i, instance_dev = ad) # regist each device to driver
         ad.add_driver(main_driver)
         ad.update_sn()
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     try:
         print(time.time())
         # main(debug_main = False, dev_type = 'MTLT335')  # open debug mode
-        main(dev_type = 'OPENIMU300RI', bcm_pin_list=[4])  # from type in JSON
+        main(dev_type = 'OPENIMU300RI', app='IMU',bcm_pin_list=[4])  # from type in JSON
     except Exception as e:
         print(e)
         traceback.print_exc()

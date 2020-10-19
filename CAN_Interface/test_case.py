@@ -430,7 +430,7 @@ class aceinna_test_case():
         if payload == False: 
             self.function_measure_data[sys._getframe().f_code.co_name] = payload
             return payload
-        feedback = payload[-10:] 
+        feedback = payload[:] 
         # fw_str = '.'.join([payload[:2], payload[2:4], payload[4:6], payload[6:8], payload[8:10]])
         measure_data = "0x{0}".format(feedback)
         self.function_measure_data[sys._getframe().f_code.co_name] = measure_data  
@@ -955,8 +955,8 @@ class aceinna_test_case():
             try_idx = idx_list if tryidx == None else [tryidx]
             try:
                 for j in try_idx:
-                    if (False in list(results.values())) or self.debug:
-                        break
+                    # if (False in list(results.values())) and self.debug:
+                    #     continue
                     if self.debug: eval('print(k,i)', {'k':sys._getframe().f_code.co_name, 'i':[ps_type, i,j, idx_list, try_idx]})
                     cmd_name = cmdname[j] # list out of range
                     item_dict = self.dev.get_item_json(namestr = cmd_name)
@@ -1089,7 +1089,7 @@ class aceinna_test_case():
         elif types_data == 5:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F] 
         elif types_data == 4:
-            type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF] 
+            type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF] if self.dev.dev_app == 'VG_AHRS' else [0, 2, 4, 8, 0xA, 0xE]
         else:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F] 
             print("packet type use 5 number types")
