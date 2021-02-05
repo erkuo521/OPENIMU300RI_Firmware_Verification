@@ -1,5 +1,5 @@
 '''
-version 1.1.0 in Aceinna
+version 3.1.5 in Aceinna
 mtlt products(MTLT305D and 300RI included now) CAN Bus read and send message module
 Requires PI3B and CAN_HAT(shopping link: https://m.tb.cn/h.eRtgNe2)
 with H/L of CAN_HAT connected with H/L from sensor side
@@ -240,7 +240,9 @@ class aceinna_device():
                 if (self.sw_rst_support == False) and (payload_without_src == [2]):
                     payload = [0] + [self.src] # save configurations 
                     self.driver.send_can_msg(ext_id, payload)
+                    
                     if self.auto_power.enabled: # only if enabled, it will power on and off by gpio automaticaly.  default will not use auto-power, need manual power on and off
+                        time.sleep(1)
                         self.auto_power.power_off()
                         time.sleep(4)
                         self.auto_power.power_on()
@@ -493,9 +495,9 @@ class aceinna_device():
                     time.sleep(4)
                     self.auto_power.power_on()
                 else:
-                    self.set_cmd('algo_rst', [2]) # no save reset
-                    # while input('need to reset power(!!!strong recommend let unit keep power off > 3s !!!), is it finished, y/n ? ') != 'y':
-                    #     pass
+                    # self.set_cmd('algo_rst', [2]) # no save reset
+                    while input('need to reset power(!!!strong recommend let unit keep power off > 3s !!!), is it finished, y/n ? ') != 'y':
+                        pass
                 time.sleep(1)   
                 payload = self.request_cmd('unit_behavior')
                 time.sleep(1)  

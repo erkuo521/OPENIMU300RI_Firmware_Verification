@@ -1,4 +1,4 @@
-
+import time
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
@@ -29,3 +29,11 @@ class aceinna_gpio():
     def power_off(self):    
         GPIO.output(self.power_pin,GPIO.LOW) 
         print('power off now of pin_BCM: ', self.power_pin)
+
+if __name__ == "__main__":
+    a = aceinna_gpio(use_gpio=True)
+    while True:
+        a.power_off()
+        time.sleep(2)
+        a.power_on()
+        time.sleep(2)

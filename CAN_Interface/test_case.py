@@ -1,6 +1,6 @@
 '''
 CAN testing script
-v1.0.0 20200509 erkuo chen
+v3.1.5 20200509 erkuo chen
 '''
 
 import os
@@ -704,6 +704,7 @@ class aceinna_test_case():
             target_data = hex(self.dev.default_confi['lpf_filter'][0]*256 + self.dev.default_confi['lpf_filter'][1])
         self.dev.set_cmd('set_lpf_filter', [int(target_data, 16) >> 8, int(target_data, 16) & 0x00FF])
         time.sleep(0.2)
+        # input('before rst')
         if saved_rst == True:
             self.dev.set_cmd('save_config', [2]) # save and restart
             time.sleep(2)
@@ -719,7 +720,7 @@ class aceinna_test_case():
             time.sleep(2)
             target_data = hex(self.dev.default_confi['lpf_filter'][0]*256 + self.dev.default_confi['lpf_filter'][1]) # if no save repower, target data should be update to default value
             self.dev.driver.send_wakeup_msg() 
-
+        # input('after rst')
         payload = self.dev.request_cmd('lpf_filter')
         time.sleep(0.2)
         if payload == False: 

@@ -1,6 +1,7 @@
 '''
 CAN testing script
-v1.0.0 20200509 erkuo chen
+v3.1.5 20200509 erkuo chen
+pls select right app which are tested now
 '''
 
 import os
@@ -26,7 +27,7 @@ def main(dev_type = 'MTLT305D', app = 'IMU', bcm_pin_list = []):
     gpio_list = []
     bcm_pin_list.sort()
     for pin in bcm_pin_list: # created gpio instance based on pins, sorted the list firstly
-        exec(f'gpio_{pin}=aceinna_gpio(pwr_pin = {pin})') # sequence is correspond to sequency indev_nodes.
+        exec(f'gpio_{pin}=aceinna_gpio(pwr_pin = {pin}, use_gpio=True)') # sequence is correspond to sequency indev_nodes.
         exec(f'gpio_list.append(gpio_{pin})')  
 
     main_driver = aceinna_driver(debug_mode = debug_main)
@@ -59,7 +60,7 @@ if __name__ == "__main__":
     try:
         print(time.time())
         # main(debug_main = False, dev_type = 'MTLT335')  # open debug mode
-        main(dev_type = 'OPENIMU300RI', app='IMU',bcm_pin_list=[4])  # from type in JSON
+        main(dev_type = 'OPENIMU300RI', app='VG_AHRS',bcm_pin_list=[4])  # from type in JSON, need to select app type
     except Exception as e:
         print(e)
         traceback.print_exc()
