@@ -1,6 +1,7 @@
 {
     "name":"parameters for devices",
     "type":"OPENIMU300RI",
+    "type-selection":"pls input app IMU type to main() function, keep ssi2 in 4 types name for IMU, target vale in test case will substract 1",
 
     "test_items":[],
     "start_idx": -1, 
@@ -26,7 +27,7 @@
             "try_idx":[0, 1, 2, 3]
         },
 
-        "exclude_list":["1.5", "2.1", "2.2", "2.3", "2.4", "3.6", "3.9", "3.10", "3.11", "3.12", "4.1.7", "4.1.8", "4.1.9", "4.1.10", "4.1.11", "4.2.7", "4.2.9", "5.1.5", "5.1.6", 
+        "exclude_list":["1.5", "2.1", "2.2", "2.3", "2.4", "3.6", "3.9", "3.10", "3.11", "3.12", "4.1.7", "4.1.8", "4.1.9", "4.1.10", "4.1.11", "4.2.2", "4.2.7", "4.2.9", "5.1.5", "5.1.6", 
                         "5.1.7", "5.2.5", "5.2.6", "5.2.7"],
 
         "manual_check":

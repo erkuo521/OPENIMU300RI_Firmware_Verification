@@ -647,7 +647,7 @@ class aceinna_test_case():
         if target_data.strip() == '':
             target_data = hex(self.dev.default_confi['pkt_type'])
         if 'max' in target_data:
-            target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1)
+            target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1) if self.dev.dev_app!='IMU' else hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 1)
         self.dev.set_cmd('set_pkt_type', [int(target_data, 16)])
         time.sleep(0.2)
         if saved_rst == True:
@@ -692,6 +692,7 @@ class aceinna_test_case():
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[target_data, measure_data]})        
         self.function_measure_data[sys._getframe().f_code.co_name] = True
         if int(measure_data, 16) != int(target_data, 16):
+            self.function_measure_data[sys._getframe().f_code.co_name] = False
             return False
         return True
 

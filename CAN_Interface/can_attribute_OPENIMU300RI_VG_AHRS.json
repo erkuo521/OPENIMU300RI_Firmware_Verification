@@ -1,6 +1,7 @@
 {
     "name":"parameters for devices",
     "type":"OPENIMU300RI",
+    "type-selection":"pls input app type to main() function",
 
     "test_items":[],
     "start_idx": -1, 
