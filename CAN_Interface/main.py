@@ -60,7 +60,7 @@ if __name__ == "__main__":
     try:
         print(time.time())
         # main(debug_main = False, dev_type = 'MTLT335')  # open debug mode
-        main(dev_type = 'OPENIMU300RI', app='VG_AHRS',bcm_pin_list=[4])  # ---- from type in JSON, need to select app type ----
+        main(dev_type = 'OPENIMU300RI', app='IMU',bcm_pin_list=[4])  # ---- from type in JSON, need to select app type ----
     except Exception as e:
         print(e)
         traceback.print_exc()

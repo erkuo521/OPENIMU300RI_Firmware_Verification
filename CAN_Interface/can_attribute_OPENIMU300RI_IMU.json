@@ -1,5 +1,6 @@
 {
     "name":"parameters for devices",
+    "version":"3.1.7",
     "type":"OPENIMU300RI",
     "type-selection":"pls input app IMU type to main() function, keep ssi2 in 4 types name for IMU, target vale in test case will substract 1",
 
@@ -8,10 +9,10 @@
     "debug_mode":"FALSE", 
 
     "predefine":{
-        "fwnum":"0x0301000005",
+        "fwnum":"0x0301000007",
         "types_data":4,
         "types_name":["ssi2", "rate", "accel", "mag"],
-        "unit_behavior": [218, 128],
+        "unit_behavior": [72, 194],
         "bits_unit_bhr": 8,
         "pkt_rate":1,
         "pkt_type":7,
@@ -19,16 +20,15 @@
         "orientation":[0, 0],
         "algo_ctl":"00D007D0070A00",
         "set_bank_ps0": {
-            "ps_default":{"rse0":"0x00", "save_config":"0x00", "rse1":"0x00", "rse2":"0x00", "rse3":"0x00", "rse4":"0x00", "rse5":"0x00"},
+            "ps_default":{"algo_rst":"0x00", "save_conf ig":"0x00", "status":"0x00", "mag_align":"0x00", "rse3":"0x00", "rse4":"0x00", "rse5":"0x00"},
             "try_idx":[]
         },
         "set_bank_ps1": {
-            "ps_default":{"pkt_rate":"0x55", "pkt_type":"0x56", "lpf_filter":"0x57", "orientation":"0x58", "rse0":"0x00", "rse1":"0x00", "rse2":"0x00"},
-            "try_idx":[0, 1, 2, 3]
+            "ps_default":{"pkt_rate":"0x55", "pkt_type":"0x56", "lpf_filter":"0x57", "orientation":"0x58", "unit_behavior":"0x59", "rse1":"0x00", "rse2":"0x00"},
+            "try_idx":[0, 1, 2, 3, 4]
         },
 
-        "exclude_list":["1.5", "2.1", "2.2", "2.3", "2.4", "3.6", "3.9", "3.10", "3.11", "3.12", "4.1.7", "4.1.8", "4.1.9", "4.1.10", "4.1.11", "4.2.2", "4.2.7", "4.2.9", "5.1.5", "5.1.6", 
-                        "5.1.7", "5.2.5", "5.2.6", "5.2.7"],
+        "exclude_list":["1.5", "2.1", "2.2", "2.3", "2.4", "3.9", "3.10", "3.11", "3.12", "4.1.7", "4.1.8", "4.1.9", "4.1.11", "4.2.9", "5.1.6", "5.1.7", "5.2.5", "5.2.6", "5.2.7"],
 
         "manual_check":
         [
@@ -51,7 +51,8 @@
             {"req_id":2, "name":"pkt_rate",            "pgn": 65365, "type":"request", "fb_length":2},
             {"req_id":3, "name":"pkt_type",            "pgn": 65366, "type":"request", "fb_length":3},
             {"req_id":4, "name":"lpf_filter",          "pgn": 65367, "type":"request", "fb_length":3},
-            {"req_id":5, "name":"orientation",         "pgn": 65368, "type":"request", "fb_length":3},           
+            {"req_id":5, "name":"orientation",         "pgn": 65368, "type":"request", "fb_length":3},
+            {"req_id":6, "name":"unit_behavior",       "pgn": 65369, "type":"request", "fb_length":3},           
             {"fb_id":0, "name":"save_config_feedback",    "pgn": 65361, "type":"feedback"},
             {"fb_id":1, "name":"algo_rst_feedback",       "pgn": 65360, "type":"feedback"},
             {"set_id":0, "name":"save_config",     "ext_set_id":419385600, "type":"set", "restart_support":"FALSE"},
@@ -61,8 +62,9 @@
             {"set_id":4, "name":"set_lpf_filter",  "ext_set_id":419387136, "type":"set"},
             {"set_id":5, "name":"set_orientation",  "ext_set_id":419387392, "type":"set"},
             {"set_id":6, "name":"set_algo_ctl",    "ext_set_id":419388160, "type":"set"},
-            {"set_id":8, "name":"set_bank_ps0",    "ext_set_id":419426304, "type":"set"},
-            {"set_id":9, "name":"set_bank_ps1",    "ext_set_id":419426560, "type":"set"}
+            {"set_id":7, "name":"set_bank_ps0",    "ext_set_id":419426304, "type":"set"},
+            {"set_id":8, "name":"set_bank_ps1",    "ext_set_id":419426560, "type":"set"},
+            {"set_id":9, "name":"set_unit_behavior","ext_set_id":419387648, "type":"set"}
         ],
         "uart":{}
     }    
