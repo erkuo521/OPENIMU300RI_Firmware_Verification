@@ -60,6 +60,7 @@ class aceinna_test_case():
                 for idx,i in enumerate(self.test_case):
                     if i[0] in test_item:
                         print(i[0], 'idx:', idx, ' src: ', hex(self.dev.src))
+                        # input(i[0])
                         if self.debug: eval('input([k, i])', {'k':sys._getframe().f_code.co_name, 'i':str(i[0]) + ' idx: ' + str(idx) + ' src: ' + hex(self.dev.src)})   # row = self.test_items.index(i[0]) + self.test_start_row
                         if i[1] != 'manual' and i[1] != '':
                             eval(i[2], {'self':self, 'item':i[0],'targetdata':i[3], 'key':i[1]})    
@@ -129,7 +130,7 @@ class aceinna_test_case():
         self.test_case.append(['4.2.4', 'set_pkt_type', 'self.test_file.write([item, self.set_pkt_type(targetdata), self.function_measure_data[key]])', '0x0F'])
         self.test_case.append(['4.2.5', 'set_lpf_filter', 'self.test_file.write([item, self.set_lpf_filter(targetdata), self.function_measure_data[key]])', '0x0505'])
         self.test_case.append(['4.2.6', 'set_orientation', 'self.test_file.write([item, self.set_orientation(targetdata), self.function_measure_data[key]])', '0x0009'])
-        self.test_case.append(['4.2.7', 'set_unit_behavior', 'self.test_file.write([item, self.set_unit_behavior(targetdata), self.function_measure_data[key]])', [222, 129]])
+        self.test_case.append(['4.2.7', 'set_unit_behavior', 'self.test_file.write([item, self.set_unit_behavior(targetdata), self.function_measure_data[key]])', [00, 66]])
         self.test_case.append(['4.2.8', 'set_bank_ps0', 'self.test_file.write([item, self.set_bank_ps0(targetdata), self.function_measure_data[key]])', ''])
         self.test_case.append(['4.2.9', 'set_algo_ctl', 'self.test_file.write([item, self.set_algo_ctl(targetdata), self.function_measure_data[key]])', '00E803E8031400'])
         self.test_case.append(['4.2.10', 'set_bank_ps1', 'self.test_file.write([item, self.set_bank_ps1(targetdata), self.function_measure_data[key]])', ''])
@@ -146,7 +147,7 @@ class aceinna_test_case():
         self.test_case.append(['5.1.2', 'set_pkt_type', 'self.test_file.write([item, self.set_pkt_type(targetdata, saved_rst=True), self.function_measure_data[key]])', '0x0F'])
         self.test_case.append(['5.1.3', 'set_lpf_filter', 'self.test_file.write([item, self.set_lpf_filter(targetdata, saved_rst=True), self.function_measure_data[key]])', '0x0505'])
         self.test_case.append(['5.1.4', 'set_orientation', 'self.test_file.write([item, self.set_orientation(targetdata, saved_rst=True), self.function_measure_data[key]])', '0x0009'])
-        self.test_case.append(['5.1.5', 'set_unit_behavior', 'self.test_file.write([item, self.set_unit_behavior(targetdata, saved_rst=True), self.function_measure_data[key]])', [222, 129]])
+        self.test_case.append(['5.1.5', 'set_unit_behavior', 'self.test_file.write([item, self.set_unit_behavior(targetdata, saved_rst=True), self.function_measure_data[key]])', [00, 66]])
         self.test_case.append(['5.1.6', 'set_algo_ctl', 'self.test_file.write([item, self.set_algo_ctl(targetdata, saved_rst=True), self.function_measure_data[key]])', '00E803E8031400'])
         self.test_case.append(['5.1.7', 'set_hw_bit_ps', 'self.test_file.write([item, self.set_hw_bit_ps(targetdata, saved_rst=True), self.function_measure_data[key]])', '0x0000'])
         self.test_case.append(['', '', 'self.test_file.write([item])', ''])
@@ -647,8 +648,16 @@ class aceinna_test_case():
         if target_data.strip() == '':
             target_data = hex(self.dev.default_confi['pkt_type'])
         if 'max' in target_data:
-            target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1) if self.dev.dev_app!='IMU' else hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 1)
-        self.dev.set_cmd('set_pkt_type', [int(target_data, 16)])
+            if self.dev.dev_app == 'VG_AHRS':
+                target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1) 
+            elif self.dev.dev_app == 'INS':
+                target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 32)
+            else:
+                target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 1)
+        if int(target_data, 16) < 256:
+            self.dev.set_cmd('set_pkt_type', [int(target_data, 16)])
+        else:
+            self.dev.set_cmd('set_pkt_type', [int(target_data, 16)&0xff, (int(target_data, 16)>>8)&0xff])
         time.sleep(0.2)
         if saved_rst == True:
             self.dev.set_cmd('save_config', [2]) # save and restart
@@ -678,15 +687,18 @@ class aceinna_test_case():
             len_fb_bytes = 3
             feedback = payload[-(len_fb_bytes-1)*2:]
             feedback = hex(struct.unpack('<h', bytes.fromhex(feedback))[0])[2:]
+            # input([payload, feedback])
         # feedback = payload[-2:]
         measure_data = "0x{0}".format(feedback)        
         if type_measure:
             types_data = len(self.dev.predefine.get('types_name'))
             # default_data = hex(pow(2, types_data) - 1) # this is default num
             pkt_type_mea = self.dev.measure_pkt_type(type_num=types_data)
+
             if self.debug or (pkt_type_mea != int(target_data, 16)): eval('print(k, i)', {'k':sys._getframe().f_code.co_name, 
                                                                     'i':['get cmd data:', measure_data, types_data, 'measure pkt type data:', pkt_type_mea]})
-            if pkt_type_mea != int(target_data, 16):                
+            if pkt_type_mea != int(target_data, 16):  
+                self.function_measure_data[sys._getframe().f_code.co_name] = False              
                 return False
         self.dev.set_to_default(pwr_rst = False)
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[target_data, measure_data]})        
@@ -976,7 +988,7 @@ class aceinna_test_case():
                         if self.debug: eval('print(k,i)', {'k':sys._getframe().f_code.co_name, 'i':[results, item_dict.get('type'), feedback, feedback2]})
                     elif item_dict.get('type') == 'request': # request cmd
                         feedback = self.dev.request_cmd(cmd_name)
-                        feedback2 = self.dev.new_request_cmd(src = 0, new_pgn = 0xFF00 + newps)
+                        feedback2 = self.dev.new_request_cmd(src = 0, new_pgn = 0xFF00 + newps, reversed=True)
                         if (feedback != False) or (feedback2 == False):
                             results[cmd_name] = False
                         else:
@@ -1003,7 +1015,11 @@ class aceinna_test_case():
 
     def get_msg(self, target_data='acc_hr', back_default = True): # 4.3.6
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':target_data})
-        self.dev.set_cmd('set_pkt_type', [pow(2, len(self.dev.predefine.get('types_name'))) - 1])
+        value = pow(2, len(self.dev.predefine.get('types_name'))) - 1
+        if value > 255:
+            self.dev.set_cmd('set_pkt_type', [value&0xFF, (value>>8)&0xFF])
+        else:
+            self.dev.set_cmd('set_pkt_type', [value]) 
         self.dev.set_cmd('set_pkt_rate', [1])
         self.dev.empty_data_pkt()
         time.sleep(0.5)        
@@ -1086,6 +1102,8 @@ class aceinna_test_case():
         # check all lpf configuration list is valid
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':target_data})
         types_data = len(self.dev.predefine.get('types_name'))
+        if types_data == 9:
+            type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F, 0x5F, 0xDF, 0x1DF]
         if types_data == 6:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F, 0x2F, 0x3F] 
         elif types_data == 5:
@@ -1102,7 +1120,10 @@ class aceinna_test_case():
             if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':type_set_ok})
             if type_set_ok == False:
                 break
-            self.dev.set_cmd('set_pkt_type', [value])
+            if value > 255:
+                self.dev.set_cmd('set_pkt_type', [value&0xFF, (value>>8)&0xFF])
+            else:
+                self.dev.set_cmd('set_pkt_type', [value]) 
             time.sleep(0.5)
             if self.test_pkt_type(target_data=hex(value)) == False:
                 type_set_ok = False
@@ -1307,7 +1328,12 @@ class aceinna_test_case():
         if self.debug: eval('print(k)', {'k':sys._getframe().f_code.co_name})
         self.dev.set_to_default(pwr_rst = False)
         time.sleep(0.2)
-        self.dev.set_cmd('set_pkt_type', [pow(2, len(self.dev.predefine.get('types_name'))) - 1])
+        # self.dev.set_cmd('set_pkt_type', [pow(2, len(self.dev.predefine.get('types_name'))) - 1])
+        value = pow(2, len(self.dev.predefine.get('types_name'))) - 1
+        if value > 255:
+            self.dev.set_cmd('set_pkt_type', [value&0xFF, (value>>8)&0xFF])
+        else:
+            self.dev.set_cmd('set_pkt_type', [value]) 
         time.sleep(0.2)
         self.dev.set_cmd('set_pkt_rate', [1])
         time.sleep(0.2)

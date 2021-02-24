@@ -19,8 +19,8 @@
         "orientation":[0, 0],
         "algo_ctl":"00D007D0070A00",
         "set_bank_ps0": {
-            "ps_default":{"rse0":"0x00", "save_config":"0x51", "rse1":"0x00", "rse2":"0x00", "rse3":"0x00", "rse4":"0x00", "rse5":"0x00"},
-            "try_idx":[1]
+            "ps_default":{"rse0":"0x00", "save_config":"0x00", "rse1":"0x00", "rse2":"0x00", "rse3":"0x00", "rse4":"0x00", "rse5":"0x00"},
+            "try_idx":[]
         },
         "set_bank_ps1": {
             "ps_default":{"pkt_rate":"0x55", "pkt_type":"0x56", "lpf_filter":"0x57", "orientation":"0x58", "rse0":"0x00", "rse1":"0x00", "rse2":"0x00"},

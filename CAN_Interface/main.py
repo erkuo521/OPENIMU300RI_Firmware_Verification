@@ -38,7 +38,7 @@ def main(dev_type = 'MTLT305D', app = 'IMU', bcm_pin_list = []):
         ad = aceinna_device(i, attribute_json = can_attribute,debug_mode = debug_main, power_gpio=gpio_list[idx], devtype=dev_type, app_type=app)
         main_driver.register_dev(dev_src = i, instance_dev = ad) # regist each device to driver
         ad.add_driver(main_driver)
-        ad.update_sn()
+        ad.update_sn(j1939_format=True)
         device_list.append(ad) # add each device instance to device_list
     if debug_main: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':len(device_list)})
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     try:
         print(time.time())
         # main(debug_main = False, dev_type = 'MTLT335')  # open debug mode
-        main(dev_type = 'OPENIMU300RI', app='IMU',bcm_pin_list=[4])  # from type in JSON, need to select app type
+        main(dev_type = 'OPENIMU300RI', app='VG_AHRS',bcm_pin_list=[4])  # ---- from type in JSON, need to select app type ----
     except Exception as e:
         print(e)
         traceback.print_exc()

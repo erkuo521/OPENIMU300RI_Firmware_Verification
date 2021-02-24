@@ -51,17 +51,26 @@ class aceinna_device():
     def add_driver(self, driver_instance):
         self.driver = driver_instance
 
-    def update_sn(self):
+    def update_sn(self, j1939_format=False):        
         '''
         calc sn number, which include last 5 fugures in hex format sn(on housing surface). 
         '''
         if self.debug: eval('print(k)', {'k':sys._getframe().f_code.co_name})
         ecu_id_payload = self.request_cmd(cmd_name = 'ecu_id')
-        # if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':ecu_id_payload})
-        high_16bits_value = int(ecu_id_payload[-2:] + ecu_id_payload[-4:-2], 16) << 5
-        low_5bits_value = int(ecu_id_payload[-6:-4], 16) >> 3
-        if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':ecu_id_payload})
-        self.sn_can = high_16bits_value + low_5bits_value  # it is the last 5 figures in whole hex_sn.
+        if ecu_id_payload == False:
+            ecu_id_payload = self.request_cmd(cmd_name = 'ecu_id', reversed=False)
+            if ecu_id_payload == False:
+                print("get ecu_id failed in update_sn.")
+        # if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':ecu_id_payload})   
+        if j1939_format:
+            high_5bits_value = (int(ecu_id_payload[4:6], 16) & 0b11111) << 16 
+            low_16bits_value = int(ecu_id_payload[2:4] + ecu_id_payload[:2], 16) # it is the last 16 figures in whole hex_sn.
+            self.sn_can = high_5bits_value + low_16bits_value 
+        else:
+            high_16bits_value = int(ecu_id_payload[-2:] + ecu_id_payload[-4:-2], 16) << 5
+            low_5bits_value = int(ecu_id_payload[-6:-4], 16) >> 3 # it is the last 5 figures in whole hex_sn.
+            self.sn_can = high_16bits_value + low_5bits_value  
+        if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[ecu_id_payload, self.sn_can]})
     
     def init_default_confi(self):
         if self.debug: eval('print(k)', {'k':sys._getframe().f_code.co_name})
@@ -115,8 +124,9 @@ class aceinna_device():
     def get_item_json(self, namestr = None, pgnnum = None, extsetid = None): 
         '''
         return json item dict which you selected by name/pgnnum/extsetid
-        '''             
-        # if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[namestr, pgnnum, extsetid]})
+        '''    
+        # if pgnnum not in [61481,61482, 61485, 61183]:
+        #     if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[namestr, pgnnum, extsetid]})
         if namestr != None: 
             if len([x for x in self.can_attribute if x['name'] == namestr]) == 0:
                 # print('the item is not found in JSON file, return 333333')
@@ -161,8 +171,10 @@ class aceinna_device():
         'lpf_filter', 'orientation', 'unit_behavior', 'algo_ctl']
         unit_behavior2 is True will receive 3 bytes in feedback, for FW update version.19.1.81 or above
         '''
-        if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[cmd_name, reversed]})
+        
         pgn_des = self.get_item_json(namestr = cmd_name)
+        if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[cmd_name, reversed, pgn_des]})
+        # input('123')
         if len(pgn_des):
             cmd_idx = pgn_des['req_id']
             cmd_pgn = pgn_des['pgn']
@@ -170,7 +182,7 @@ class aceinna_device():
             self.req_feedback_payload[cmd_idx] = None # set the value which correspond to cmd_idx in list(req_feedback_payload) to None
             if self.debug: eval('print(k, i, j)', {'k':sys._getframe().f_code.co_name,'i':[cmd_idx] + [cmd_name], 'j':self.req_feedback_payload[cmd_idx]}) 
             data = [00, (cmd_pgn >> 8) & 0xFF, cmd_pgn & 0x00FF]
-            if self.dev_type == "MTLT335" and reversed:
+            if self.dev_type == "OPENIMU300RI" and reversed:
                 data = data[::-1]
             for i in range(3): # send 3 times to avoid not working in some abnormal condition
                 # input(i)
@@ -183,6 +195,7 @@ class aceinna_device():
                     pass # to be added                 
             return False 
         else:
+            if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':[cmd_name, reversed, 'pgn_des length is 0']})
             return False  
 
     def prehandle_payload(self, payload, pgndes):
@@ -200,7 +213,7 @@ class aceinna_device():
         else:
             return temp_pl        
 
-    def new_request_cmd(self, src, new_pgn):
+    def new_request_cmd(self, src, new_pgn, reversed=True):
         '''
         if new ps changed and check whether new ps-PGN feedback or not after send new_pgn request
         return new ps-pgn msg payload
@@ -209,7 +222,7 @@ class aceinna_device():
         self.empty_data_pkt()
         time.sleep(2)
         data = [00, (new_pgn >> 8) & 0xFF, new_pgn & 0x00FF]   # first byte is 00 to apply for FW update
-        if self.dev_type == "MTLT335":
+        if self.dev_type == "MTLT335" or reversed:
             data = data[::-1]
         for i in range(3):   
             self.driver.send_can_msg(self.req_ext_id_templete, data) # data: [80 FF 52]
@@ -242,9 +255,9 @@ class aceinna_device():
                     self.driver.send_can_msg(ext_id, payload)
                     
                     if self.auto_power.enabled: # only if enabled, it will power on and off by gpio automaticaly.  default will not use auto-power, need manual power on and off
-                        time.sleep(1)
+                        time.sleep(2)
                         self.auto_power.power_off()
-                        time.sleep(4)
+                        time.sleep(2)
                         self.auto_power.power_on()
                     else:
                         # self.set_cmd('algo_rst', [2]) # no save reset
@@ -392,7 +405,12 @@ class aceinna_device():
         measure 5s, calc the average of received accel msg numbers
         ''' 
         if self.debug: eval('print(k)', {'k':sys._getframe().f_code.co_name})
-        self.set_cmd('set_pkt_type', [pow(2, len(self.predefine.get('types_name')))-1])
+        # self.set_cmd('set_pkt_type', [pow(2, len(self.predefine.get('types_name')))-1])
+        value = pow(2, len(self.predefine.get('types_name'))) - 1
+        if value > 255:
+            self.set_cmd('set_pkt_type', [value&0xFF, (value>>8)&0xFF])
+        else:
+            self.set_cmd('set_pkt_type', [value]) 
         time.sleep(0.2)
         pgn_des = self.get_item_json(namestr = 'accel')
         id_idx = pgn_des['auto_id']    
@@ -482,6 +500,7 @@ class aceinna_device():
             self.set_cmd('set_' + i, self.default_confi[i])
         # check whether can get unit behavior or not, to confirm the right feedbac from unit. then can start to set.
         if self.dev_type != 'OPENIMU300RI':
+        # if True:
             payload = self.request_cmd('unit_behavior')
             for i in range(3):   # some times unit will no feedback for 80FF59 Request, need to restart by SW or manualy restart in below
                 if payload == False: 
@@ -504,11 +523,11 @@ class aceinna_device():
                 payload = self.request_cmd('unit_behavior', reversed=False) #use 305D format to request msg
             # set unit behavior to 0, and then configure it to default value based on JSON. alos configure all other items
             # fb_lth_bytes = self.get_item_json('unit_behavior')['fb_length']
-            disablebit = int(payload[2:4], 16)
-            disablebit_rawrate = int(payload[4:6], 16)
-            time.sleep(1)        
-            self.set_cmd('set_unit_behavior', [0, 0, disablebit, disablebit_rawrate, self.src])
-            time.sleep(1)
+            # disablebit = int(payload[2:4], 16)
+            # disablebit_rawrate = int(payload[4:6], 16)
+            # time.sleep(1)        
+            # self.set_cmd('set_unit_behavior', [0, 0, disablebit, disablebit_rawrate, self.src])
+            # time.sleep(1)
         for i in ['algo_ctl', 'pkt_rate','pkt_type', 'lpf_filter', 'orientation', 'bank_ps0', 'bank_ps1']:
             if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name, 'i': i})
             if isinstance(self.default_confi[i], list):
@@ -516,16 +535,23 @@ class aceinna_device():
             elif i == 'algo_ctl' and isinstance(self.default_confi['algo_ctl'], str):
                 self.set_cmd('set_' + i, [int(self.default_confi['algo_ctl'][x:x+2], 16) for x in range(0,13,2)])
             else:
-                self.set_cmd('set_' + i, [self.default_confi[i]])
-        time.sleep(1)        
-        self.set_cmd('set_unit_behavior', self.default_confi['unit_behavior'] + [0, 0, self.src])    # set unit behavior     
-
-        time.sleep(1)
+                if self.default_confi[i] > 255:
+                    con_list = [self.default_confi[i]&0xff, (self.default_confi[i]>>8)&0xff]
+                    self.set_cmd('set_' + i, con_list) 
+                else:
+                    self.set_cmd('set_' + i, [self.default_confi[i]]) 
+        time.sleep(3)        
+        # self.set_cmd('set_unit_behavior', self.default_confi['unit_behavior'] + [0, 0, self.src])    # set unit behavior   
+        self.set_cmd('set_unit_behavior', self.default_confi['unit_behavior'])    # set unit behavior       
+        # input('before store')
+        time.sleep(2)
         if pwr_rst: # check whether support sw-reboot or not
             if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name, 'i':'will power reset'})
             self.set_cmd('save_config', [2]) # save and power reset
             time.sleep(1)
+            # input('after strore')
         self.driver.send_wakeup_msg()
+        # input('after wakeup')
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name, 'i':'set default end now.'})
         return True  
 
