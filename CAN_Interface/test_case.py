@@ -652,6 +652,8 @@ class aceinna_test_case():
                 target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1) 
             elif self.dev.dev_app == 'INS':
                 target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 32)
+            elif self.dev.dev_app == 'IMU':
+                target_data = hex(pow(2, 4) - 1 - 1)
             else:
                 target_data = hex(pow(2, len(self.dev.predefine.get('types_name'))) - 1 - 1)
         if int(target_data, 16) < 256:
@@ -691,7 +693,7 @@ class aceinna_test_case():
         # feedback = payload[-2:]
         measure_data = "0x{0}".format(feedback)        
         if type_measure:
-            types_data = len(self.dev.predefine.get('types_name'))
+            types_data = len(self.dev.predefine.get('types_name')) if self.dev.dev_app != 'IMU' else self.dev.predefine.get('types_data')
             # default_data = hex(pow(2, types_data) - 1) # this is default num
             pkt_type_mea = self.dev.measure_pkt_type(type_num=types_data)
 
@@ -1111,7 +1113,7 @@ class aceinna_test_case():
         elif types_data == 4:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF]
         elif types_data == 3:
-            type_list          = [0, 2, 4, 8, 0xA, 0xE] 
+            type_list          = [0, 2, 4, 6, 8, 0xA, 0xE] 
         else:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F] 
             print("packet type use 5 number types")

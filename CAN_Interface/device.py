@@ -365,7 +365,7 @@ class aceinna_device():
         '''
         based on types_data and types_name in json, to calc actual msg 
         '''
-        if self.debug: eval('print(k)', {'k':sys._getframe().f_code.co_name})
+        if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name, 'i':[type_num]})
         payload = self.request_cmd('pkt_rate')
         while payload == False:
             if self.auto_power.enabled: # only if enabled, it will power on and off by gpio automaticaly.  default will not use auto-power, need manual power on and off
@@ -389,8 +389,13 @@ class aceinna_device():
         if self.debug: eval('print(k,j,slope)', {'k':sys._getframe().f_code.co_name, 'j': self.auto_msg_queue[idx_list[0]].qsize(), 'slope':'slope_exist:'})        
         time.sleep(2) # wait 1s to receive packets again        
         for i in range(type_num): # give right value to each type value in type list
-            if self.debug: eval('print(k,m )', {'k':sys._getframe().f_code.co_name, 'm':[i, idx_list[i], self.auto_msg_queue[idx_list[i]].qsize()]})
-            exist_list[i]  = pow(2, i) if (self.auto_msg_queue[idx_list[i]].qsize() > 0) else 0
+            if self.dev_app != 'IMU':
+                if self.debug: eval('print(k,m )', {'k':sys._getframe().f_code.co_name, 'm':[i, idx_list[i], self.auto_msg_queue[idx_list[i]].qsize()]})
+                exist_list[i]  = pow(2, i) if (self.auto_msg_queue[idx_list[i]].qsize() > 0) else 0
+            else:
+                if i > 0:
+                    if self.debug: eval('print(k,m )', {'k':sys._getframe().f_code.co_name, 'm':[i, idx_list[i-1], self.auto_msg_queue[idx_list[i-1]].qsize()]})
+                    exist_list[i]  = pow(2, i) if (self.auto_msg_queue[idx_list[i-1]].qsize() > 0) else 0
         sumexist = sum(exist_list)
         if self.debug: eval('print(k,j,slope,m )', {'k':sys._getframe().f_code.co_name, 'j': self.auto_msg_queue[idx_list[0]].qsize(), 'slope':'slope_exist:','m':exist_list})
         if sumexist == 0 & self.debug:
