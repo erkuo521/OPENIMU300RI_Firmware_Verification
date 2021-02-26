@@ -1,5 +1,5 @@
 '''
-version 3.1.5 in Aceinna
+version 3.1.8 in Aceinna
 mtlt products(MTLT305D and 300RI included now) CAN Bus read and send message module
 Requires PI3B and CAN_HAT(shopping link: https://m.tb.cn/h.eRtgNe2)
 with H/L of CAN_HAT connected with H/L from sensor side

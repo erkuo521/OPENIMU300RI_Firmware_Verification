@@ -1,6 +1,6 @@
 '''
 CAN testing script
-v3.1.5 20200509 erkuo chen
+v3.1.8 20200509 erkuo chen
 '''
 
 import os
@@ -871,13 +871,13 @@ class aceinna_test_case():
         
         return set_unit_bhr
 
-    def set_bank_ps0(self, target_data, saved_rst = False, algo_rst=0x60, hw_bit=0x52, sw_bit=0x53, status_bit=0x54, hr_acc=0x6C): # 4.2.8
+    def set_bank_ps0(self, target_data, saved_rst = False, algo_rst=0x60): # 4.2.8
         '''
         target_data: such as '0x0000' '0x0165'
         '''
         if self.debug: eval('print(k, i)', {'k':sys._getframe().f_code.co_name,'i':target_data})
         # algo_rst, hw_bit, sw_bit, status_bit, hr_acc = 0x60, 0x52, 0x53, 0x54, 0x6C
-        data = [algo_rst, 0, hw_bit, sw_bit, status_bit, hr_acc]
+        data = [algo_rst, 0, 0, 0, 0, 0, 0]
         self.dev.set_cmd('set_bank_ps0', data)
         time.sleep(0.2)
         if saved_rst == True:
@@ -1109,7 +1109,9 @@ class aceinna_test_case():
         elif types_data == 5:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F] 
         elif types_data == 4:
-            type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF] if self.dev.dev_app == 'VG_AHRS' else [0, 2, 4, 8, 0xA, 0xE]
+            type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF]
+        elif types_data == 3:
+            type_list          = [0, 2, 4, 8, 0xA, 0xE] 
         else:
             type_list          = [0, 1, 2, 4, 7, 8, 0xB, 0xF, 0xE, 0x13, 0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x1F] 
             print("packet type use 5 number types")

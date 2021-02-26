@@ -1,6 +1,6 @@
 '''
 CAN testing script
-v3.1.5 20200509 erkuo chen
+v3.1.8 20200509 erkuo chen
 pls select right app which are tested now
 '''
 

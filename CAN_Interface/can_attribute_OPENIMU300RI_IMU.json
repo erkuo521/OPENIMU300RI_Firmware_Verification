@@ -9,13 +9,13 @@
     "debug_mode":"FALSE", 
 
     "predefine":{
-        "fwnum":"0x0301000007",
-        "types_data":4,
-        "types_name":["ssi2", "rate", "accel", "mag"],
+        "fwnum":"0x0301000008",
+        "types_data":3,
+        "types_name":["rate", "accel", "mag"],
         "unit_behavior": [72, 194],
         "bits_unit_bhr": 8,
         "pkt_rate":1,
-        "pkt_type":7,
+        "pkt_type":14,
         "lpf_filter":[25, 25],
         "orientation":[0, 0],
         "algo_ctl":"00D007D0070A00",
